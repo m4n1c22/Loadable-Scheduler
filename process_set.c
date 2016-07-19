@@ -58,7 +58,7 @@ static ssize_t process_sched_add_module_read(struct file *file, char *buf, size_
 static ssize_t process_sched_add_module_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
 	printk(KERN_INFO "Process Scheduler Add Module write.\n");
-	
+	printk(KERN_INFO "Registered Process ID: %s\n", buf);
 	/** Successful execution of write call back.*/
 	return count;
 }

@@ -6,3 +6,5 @@
 *.o
 *.o.*
 .tmp_versions*
+*.out
+*.exe

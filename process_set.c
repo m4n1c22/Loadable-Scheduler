@@ -29,107 +29,13 @@ MODULE_LICENSE("GPL");
 /** Proc FS Dir Object */
 static struct proc_dir_entry *proc_sched_add_file_entry;
 
-/** Structure for a process */
-static struct proc {
 
-	int pid;
-	struct list_head list;
-}top;
-
-/**Function Prototypes for Process Queue Functions*/
-int initialize_process_queue(void);
-int release_process_queue(void);
-int add_process_to_queue(int pid);
-int remove_process_from_queue(int pid);
-int print_process_queue(void);
-
-
-/** Process Queue Functions */
-
-/**
-	Function Name : initialize_process_queue
-	Function Type : Queue Function
-	Description	  :	Method is invoked for initializing a process queue.
-*/
-int initialize_process_queue(void) {
-
-	printk(KERN_INFO "Initializing the Process Queue...\n");
-	INIT_LIST_HEAD(&top.list);
-	return 0;
-}
-
-/**
-	Function Name : release_process_queue
-	Function Type : Queue Function
-	Description	  :	Method is invoked for releasing a process queue.
-*/
-int release_process_queue(void) {
-		 	
-	struct proc *tmp, *node;
-	printk(KERN_INFO "Releasing Process Queue...\n");
-	list_for_each_entry_safe(node, tmp, &(top.list), list) {
-	
-		list_del(&node->list);
-		kfree(node);
-	}
-	return 0;
-}
-
-/**
-	Function Name : add_process_to_queue
-	Function Type : Queue Function
-	Description	  :	Method is invoked for adding a process into a queue.
-*/
-int add_process_to_queue(int pid) {
-			
-	struct proc *new_process = kmalloc(sizeof(struct proc), GFP_KERNEL);
-	
-	new_process->pid = pid;
-	
-	INIT_LIST_HEAD(&new_process->list);
-	
-	list_add_tail(&(new_process->list), &(top.list));
-	
-	return 0;
-}
-
-/**
-	Function Name : remove_process_from_queue
-	Function Type : Queue Function
-	Description	  :	Method is invoked for removing a given process 
-					from the queue.
-*/
-int remove_process_from_queue(int pid) {
-		 	
-	struct proc *tmp, *node;
-	
-	list_for_each_entry_safe(node, tmp, &(top.list), list) {
-	
-		if(node->pid == pid) {
-			printk(KERN_INFO "Removing the given Process %d from the  Process Queue...\n", pid);
-			list_del(&node->list);
-			kfree(node);
-		}
-	}
-	return 0;
-}
-
-
-/**
-	Function Name : print_process_queue
-	Function Type : Queue Function
-	Description	  :	Method is invoked for adding a process into a queue.
-*/
-int print_process_queue(void) {
-			
-	struct proc *tmp;
-	printk(KERN_INFO "Process Queue: \n");
-	list_for_each_entry(tmp, &(top.list), list) {
-	
-		printk(KERN_INFO "Process ID: %d\n", tmp->pid);
-	}
-	return 0;
-}
+/**External Function Prototypes for Process Queue Functions*/
+extern int init_process_queue(void);
+extern int release_process_queue(void);
+extern int add_process_to_queue(int pid);
+extern int remove_process_from_queue(int pid);
+extern int print_process_queue(void);
 
 
 /**
@@ -248,7 +154,7 @@ static int __init process_scheduler_module_init(void)
 	}
 	
 	/**Initializing the process queue*/
-	initialize_process_queue();
+	init_process_queue();
 	
 	/** Successful execution of initialization method. */
 	return 0;

@@ -134,15 +134,15 @@ static struct file_operations process_sched_add_module_fops = {
 };
 
 /**
-	Function Name : process_scheduler_module_init
+	Function Name : process_sched_add_module_init
 	Function Type : Module INIT
 	Description   : Initialization method of the Kernel module. The
 			method gets invoked when the kernel module is being
 			inserted using the command insmod.
 */
-static int __init process_scheduler_module_init(void)
+static int __init process_sched_add_module_init(void)
 {
-	printk(KERN_INFO "Process Scheduler module is being loaded.\n");
+	printk(KERN_INFO "Process Add to Scheduler module is being loaded.\n");
 	
 	/**Proc FS is created with RD&WR permissions with name process_sched_add*/
 	proc_sched_add_file_entry = proc_create(PROC_CONFIG_FILE_NAME,0777,NULL,&process_sched_add_module_fops);
@@ -161,21 +161,21 @@ static int __init process_scheduler_module_init(void)
 }
 
 /**
-	Function Name : process_scheduler_module_cleanup
+	Function Name : process_sched_add_module_cleanup
 	Function Type : Module EXIT
 	Description   : Cleanup method of the Kernel module. The
                 	method gets invoked when the kernel module is being
                  	removed using the command rmmod.
 */
-static void __exit process_scheduler_module_cleanup(void)
+static void __exit process_sched_add_module_cleanup(void)
 {
 	
 	release_process_queue();
-	printk(KERN_INFO "Process Scheduler module is being unloaded.\n");
+	printk(KERN_INFO "Process Add to Scheduler module is being unloaded.\n");
 	/** Proc FS object removed.*/
 	proc_remove(proc_sched_add_file_entry);
 }
 /** Initializing the kernel module init with custom init method */
-module_init(process_scheduler_module_init);
+module_init(process_sched_add_module_init);
 /** Initializing the kernel module exit with custom cleanup method */
-module_exit(process_scheduler_module_cleanup);
+module_exit(process_sched_add_module_cleanup);

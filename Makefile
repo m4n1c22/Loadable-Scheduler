@@ -1,5 +1,6 @@
 #MACROS
 obj-m += process_queue.o
+obj-m += process_scheduler.o
 obj-m += process_set.o
 PWD := $(shell pwd)
 KVER := $(shell uname -r)

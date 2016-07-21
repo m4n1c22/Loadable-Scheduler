@@ -18,13 +18,24 @@ MODULE_AUTHOR("Sreeram Sadasivam");
 MODULE_DESCRIPTION("Process Queue Module");
 MODULE_LICENSE("GPL");
 
+/**Enumeration for Process States*/
+enum process_state {
+	
+	eCreated		=	0, /**Process in Created State*/
+	eRunning		=	1, /**Process in Running State*/
+	eWaiting		=	2, /**Process in Waiting State*/
+	eBlocked		=	3, /**Process in Blocked State*/
+	eTerminated		=	4  /**Process in Terminate State*/
+};
 
 /** Structure for a process */
-static struct proc {
+struct proc {
 
 	int pid;
+	enum process_state state;
 	struct list_head list;
 }top;
+
 
 /**Function Prototypes for Process Queue Functions*/
 int init_process_queue(void);
@@ -32,7 +43,7 @@ int release_process_queue(void);
 int add_process_to_queue(int pid);
 int remove_process_from_queue(int pid);
 int print_process_queue(void);
-
+int change_process_state_in_queue(int pid, int changeState);
 
 /** Process Queue Functions */
 
@@ -76,6 +87,8 @@ int add_process_to_queue(int pid) {
 	
 	new_process->pid = pid;
 	
+	new_process->state = eCreated;
+
 	INIT_LIST_HEAD(&new_process->list);
 	
 	list_add_tail(&(new_process->list), &(top.list));
@@ -99,6 +112,27 @@ int remove_process_from_queue(int pid) {
 			printk(KERN_INFO "Removing the given Process %d from the  Process Queue...\n", pid);
 			list_del(&node->list);
 			kfree(node);
+		}
+	}
+	return 0;
+}
+
+/**
+	Function Name : change_process_state_in_queue
+	Function Type : Queue Function
+	Description	  :	Method is invoked for changing the process state 
+					for a given process in the queue.
+*/
+int change_process_state_in_queue(int pid, int changeState) {
+		 	
+	struct proc *tmp, *node;
+	
+	list_for_each_entry_safe(node, tmp, &(top.list), list) {
+	
+		if(node->pid == pid) {
+			
+			printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", pid);
+			node->state = changeState;
 		}
 	}
 	return 0;
@@ -158,3 +192,5 @@ EXPORT_SYMBOL_GPL(release_process_queue);
 EXPORT_SYMBOL_GPL(add_process_to_queue);
 EXPORT_SYMBOL_GPL(remove_process_from_queue);
 EXPORT_SYMBOL_GPL(print_process_queue);
+//EXPORT_SYMBOL_GPL(process_state);
+//EXPORT_SYMBOL_GPL(change_process_state_in_queue);

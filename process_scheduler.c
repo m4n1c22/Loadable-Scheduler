@@ -24,7 +24,7 @@ extern int release_process_queue(void);
 extern int add_process_to_queue(int pid);
 extern int remove_process_from_queue(int pid);
 extern int print_process_queue(void);
-
+extern int change_process_state_in_queue(int pid, int changeState);
 
 
 /**

@@ -193,4 +193,4 @@ EXPORT_SYMBOL_GPL(add_process_to_queue);
 EXPORT_SYMBOL_GPL(remove_process_from_queue);
 EXPORT_SYMBOL_GPL(print_process_queue);
 //EXPORT_SYMBOL_GPL(process_state);
-//EXPORT_SYMBOL_GPL(change_process_state_in_queue);
+EXPORT_SYMBOL_GPL(change_process_state_in_queue);

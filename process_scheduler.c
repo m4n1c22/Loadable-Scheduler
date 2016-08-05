@@ -28,6 +28,33 @@ extern int change_process_state_in_queue(int pid, int changeState);
 
 
 /**
+	Function Name : round_robin_scheduling_init
+	Function Type : Scheduling Initialization
+	Description   : Initialization method for rounnd robin scheduling scheme.
+*/
+int round_robin_scheduling_init(void)
+{
+	printk(KERN_INFO "Round Robin Scheduling scheme initialized.\n");
+		
+	/** Successful execution of initialization method. */
+	return 0;
+}
+
+/**
+	Function Name : SJF_scheduling_init
+	Function Type : Scheduling Initialization
+	Description   : Initialization method for Shortest Job First scheduling scheme.
+*/
+int SJF_scheduling_init(void)
+{
+	printk(KERN_INFO "Shortest Job Scheduling scheme initialized.\n");
+		
+	/** Successful execution of initialization method. */
+	return 0;
+}
+
+
+/**
 	Function Name : process_scheduler_module_init
 	Function Type : Module INIT
 	Description   : Initialization method of the Kernel module. The

@@ -36,6 +36,9 @@ struct proc {
 	struct list_head list;
 }top;
 
+/**Semaphore for process queue*/
+static struct semaphore mutex;
+
 
 /**Function Prototypes for Process Queue Functions*/
 int init_process_queue(void);
@@ -89,10 +92,31 @@ int add_process_to_queue(int pid) {
 	
 	new_process->state = eCreated;
 
+	/** 
+		Condition to verify the down operation on the binary semaphore
+		mutex. Entry into a Mutually exclusive block is granted by
+		having a successful lock with the mentioned semaphore.
+		mutex semaphore provides a safe access to the following
+		critical section.
+	*/
+	if(down_interruptible(&mutex)){
+		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from add function");
+		/** Issue a restart of syscall which was supposed to be executed.*/
+		return -ERESTARTSYS;
+	}
+
 	INIT_LIST_HEAD(&new_process->list);
 	
 	list_add_tail(&(new_process->list), &(top.list));
 	
+	/** 
+		Performing an up operation on mutex. Such an operation
+		indicates the critical section is released for other
+		processes/threads.
+	*/
+	up(&mutex);
+
+
 	return 0;
 }
 
@@ -105,7 +129,18 @@ int add_process_to_queue(int pid) {
 int remove_process_from_queue(int pid) {
 		 	
 	struct proc *tmp, *node;
-	
+	/** 
+		Condition to verify the down operation on the binary semaphore
+		mutex. Entry into a Mutually exclusive block is granted by
+		having a successful lock with the mentioned semaphore.
+		mutex semaphore provides a safe access to the following
+		critical section.
+	*/
+	if(down_interruptible(&mutex)){
+		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from remove function");
+		/** Issue a restart of syscall which was supposed to be executed.*/
+		return -ERESTARTSYS;
+	}	
 	list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
 		if(node->pid == pid) {
@@ -114,6 +149,13 @@ int remove_process_from_queue(int pid) {
 			kfree(node);
 		}
 	}
+	/** 
+		Performing an up operation on mutex. Such an operation
+		indicates the critical section is released for other
+		processes/threads.
+	*/
+	up(&mutex);
+
 	return 0;
 }
 
@@ -126,6 +168,18 @@ int remove_process_from_queue(int pid) {
 int change_process_state_in_queue(int pid, int changeState) {
 		 	
 	struct proc *tmp, *node;
+	/** 
+		Condition to verify the down operation on the binary semaphore
+		mutex. Entry into a Mutually exclusive block is granted by
+		having a successful lock with the mentioned semaphore.
+		mutex semaphore provides a safe access to the following
+		critical section.
+	*/
+	if(down_interruptible(&mutex)){
+		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from change process state function");
+		/** Issue a restart of syscall which was supposed to be executed.*/
+		return -ERESTARTSYS;
+	}	
 	
 	list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
@@ -135,6 +189,13 @@ int change_process_state_in_queue(int pid, int changeState) {
 			node->state = changeState;
 		}
 	}
+	/** 
+		Performing an up operation on mutex. Such an operation
+		indicates the critical section is released for other
+		processes/threads.
+	*/
+	up(&mutex);
+
 	return 0;
 }
 
@@ -148,10 +209,30 @@ int print_process_queue(void) {
 			
 	struct proc *tmp;
 	printk(KERN_INFO "Process Queue: \n");
+	/** 
+		Condition to verify the down operation on the binary semaphore
+		mutex. Entry into a Mutually exclusive block is granted by
+		having a successful lock with the mentioned semaphore.
+		mutex semaphore provides a safe access to the following
+		critical section.
+	*/
+	if(down_interruptible(&mutex)){
+		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from add function");
+		/** Issue a restart of syscall which was supposed to be executed.*/
+		return -ERESTARTSYS;
+	}	
+
 	list_for_each_entry(tmp, &(top.list), list) {
 	
 		printk(KERN_INFO "Process ID: %d\n", tmp->pid);
 	}
+	/** 
+		Performing an up operation on mutex. Such an operation
+		indicates the critical section is released for other
+		processes/threads.
+	*/
+	up(&mutex);
+
 	return 0;
 }
 
@@ -166,7 +247,12 @@ int print_process_queue(void) {
 static int __init process_queue_module_init(void)
 {
 	printk(KERN_INFO "Process Queue module is being loaded.\n");
-		
+	/** Initializing the semaphores */
+	/** 
+		Setting Mutex used for critical section inside fifo modules
+		as 1. Indicates the critical section is free from use.
+	*/
+	sema_init(&mutex,1); 		
 	/** Successful execution of initialization method. */
 	return 0;
 }

@@ -18,6 +18,9 @@ MODULE_AUTHOR("Sreeram Sadasivam");
 MODULE_DESCRIPTION("Process Queue Module");
 MODULE_LICENSE("GPL");
 
+/**Macros*/
+#define ALL_REG_PIDS	-100
+
 /**Enumeration for Process States*/
 enum process_state {
 	
@@ -47,7 +50,7 @@ int add_process_to_queue(int pid);
 int remove_process_from_queue(int pid);
 int print_process_queue(void);
 int change_process_state_in_queue(int pid, int changeState);
-
+int get_first_process_in_queue(void);
 /** Process Queue Functions */
 
 /**
@@ -90,7 +93,7 @@ int add_process_to_queue(int pid) {
 	
 	new_process->pid = pid;
 	
-	new_process->state = eCreated;
+	new_process->state = eWaiting;
 
 	/** 
 		Condition to verify the down operation on the binary semaphore
@@ -180,13 +183,22 @@ int change_process_state_in_queue(int pid, int changeState) {
 		/** Issue a restart of syscall which was supposed to be executed.*/
 		return -ERESTARTSYS;
 	}	
+	/**Check if all registered PIDs are modified for state*/
+	if(pid == ALL_REG_PIDS) {
+		list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
-	list_for_each_entry_safe(node, tmp, &(top.list), list) {
-	
-		if(node->pid == pid) {
-			
-			printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", pid);
+			printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", node->pid);
 			node->state = changeState;
+		}
+	}
+	else {
+		list_for_each_entry_safe(node, tmp, &(top.list), list) {
+		
+			if(node->pid == pid) {
+				
+				printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", pid);
+				node->state = changeState;
+			}
 		}
 	}
 	/** 
@@ -203,7 +215,7 @@ int change_process_state_in_queue(int pid, int changeState) {
 /**
 	Function Name : print_process_queue
 	Function Type : Queue Function
-	Description	  :	Method is invoked for adding a process into a queue.
+	Description	  :	Method is invoked for printing the process queue.
 */
 int print_process_queue(void) {
 			
@@ -217,7 +229,7 @@ int print_process_queue(void) {
 		critical section.
 	*/
 	if(down_interruptible(&mutex)){
-		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from add function");
+		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from print function");
 		/** Issue a restart of syscall which was supposed to be executed.*/
 		return -ERESTARTSYS;
 	}	
@@ -236,6 +248,43 @@ int print_process_queue(void) {
 	return 0;
 }
 
+/**
+	Function Name : get_first_process_in_queue
+	Function Type : Queue Function
+	Description	  :	Method is invoked for getting the first process in the queue.
+*/
+int get_first_process_in_queue(void) {
+
+	struct proc *tmp;
+	int pid = -1;
+	/** 
+		Condition to verify the down operation on the binary semaphore
+		mutex. Entry into a Mutually exclusive block is granted by
+		having a successful lock with the mentioned semaphore.
+		mutex semaphore provides a safe access to the following
+		critical section.
+	*/
+	if(down_interruptible(&mutex)){
+		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from print function");
+		/** Issue a restart of syscall which was supposed to be executed.*/
+		return -ERESTARTSYS;
+	}	
+
+	list_for_each_entry(tmp, &(top.list), list) {
+		if(pid==-1) {
+			pid = tmp->pid;	
+		}
+	}
+	/** 
+		Performing an up operation on mutex. Such an operation
+		indicates the critical section is released for other
+		processes/threads.
+	*/
+	up(&mutex);
+
+	/**Returns the first process ID*/
+	return pid;
+}
 
 /**
 	Function Name : process_queue_module_init
@@ -254,6 +303,10 @@ static int __init process_queue_module_init(void)
 	*/
 	sema_init(&mutex,1); 		
 	/** Successful execution of initialization method. */
+	
+	/**Initializing the process queue*/
+	init_process_queue();
+
 	return 0;
 }
 
@@ -267,6 +320,8 @@ static int __init process_queue_module_init(void)
 static void __exit process_queue_module_cleanup(void)
 {
 	printk(KERN_INFO "Process Queue module is being unloaded.\n");
+	/**Releasing the process queue.*/
+	release_process_queue();
 }
 /** Initializing the kernel module init with custom init method */
 module_init(process_queue_module_init);
@@ -278,5 +333,5 @@ EXPORT_SYMBOL_GPL(release_process_queue);
 EXPORT_SYMBOL_GPL(add_process_to_queue);
 EXPORT_SYMBOL_GPL(remove_process_from_queue);
 EXPORT_SYMBOL_GPL(print_process_queue);
-//EXPORT_SYMBOL_GPL(process_state);
+EXPORT_SYMBOL_GPL(get_first_process_in_queue);
 EXPORT_SYMBOL_GPL(change_process_state_in_queue);

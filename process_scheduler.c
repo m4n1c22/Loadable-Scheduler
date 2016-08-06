@@ -19,6 +19,9 @@ MODULE_AUTHOR("Sreeram Sadasivam");
 MODULE_DESCRIPTION("Process Scheduler Module");
 MODULE_LICENSE("GPL");
 
+/**Macros*/
+#define ALL_REG_PIDS	-100
+
 /**Enumeration for Process States*/
 enum process_state {
 	
@@ -29,13 +32,16 @@ enum process_state {
 	eTerminated		=	4  /**Process in Terminate State*/
 };
 
-/**Function Prototypes for Process Queue Functions*/
-extern int init_process_queue(void);
-extern int release_process_queue(void);
+/**External Function Prototypes for Process Queue Functions*/
 extern int add_process_to_queue(int pid);
 extern int remove_process_from_queue(int pid);
 extern int print_process_queue(void);
 extern int change_process_state_in_queue(int pid, int changeState);
+extern int get_first_process_in_queue(void);
+
+/**Function Prototype for Scheduler*/
+static void context_switch(void);
+int round_robin_scheduling(void);
 
 /**Flags*/
 static int flag = 0;
@@ -43,11 +49,12 @@ static int flag = 0;
 /**Time Quantum storage variable for pre-emptive based schedulers.*/
 static int time_quantum;
 
+/**Current PID*/
+static int current_pid = -1;
+
 /** WorkQueue Object */
 struct workqueue_struct *scheduler_wq;
 
-/** Internal Method for Context Switch */
-static void context_switch(void);
 
 /** Creating a delayed_work object with the provided function handler.*/
 static DECLARE_DELAYED_WORK(scheduler_hdlr, context_switch);
@@ -65,6 +72,8 @@ static void context_switch(void){
 	
 	printk(KERN_ALERT "Scheduler instance: Context Switch\n");
 
+	round_robin_scheduling();
+
 	/** Condition check for producer unloading flag set or not.*/
 	if (flag == 0){
 		/** Setting the delayed work execution for the provided rate */
@@ -77,12 +86,35 @@ static void context_switch(void){
 
 /**
 	Function Name : round_robin_scheduling
-	Function Type : Scheduling
+	Function Type : Scheduling Scheme
 	Description   : Method for rounnd robin scheduling scheme.
 */
 int round_robin_scheduling(void)
 {
+
 	printk(KERN_INFO "Round Robin Scheduling scheme.\n");
+	
+	/**Check if the process selected is a new one.*/
+	if(current_pid == -1) {
+		current_pid = get_first_process_in_queue();
+	}
+
+	/**Check if the process queue is empty.*/
+	if(current_pid != -1) {
+		add_process_to_queue(current_pid);
+
+	
+		//TODO perform the actual task stop and switch to new task
+		
+		/** Obtaining the first process in the wait queue.*/
+		current_pid = get_first_process_in_queue();
+		remove_process_from_queue(current_pid);
+
+		printk(KERN_INFO "Current Process Queue...\n");
+		print_process_queue();
+		printk(KERN_INFO "Currently running process: %d\n", current_pid);
+	
+	}	
 	
 	/** Successful execution of initialization method. */
 	return 0;

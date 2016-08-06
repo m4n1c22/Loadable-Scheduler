@@ -31,12 +31,10 @@ static struct proc_dir_entry *proc_sched_add_file_entry;
 
 
 /**External Function Prototypes for Process Queue Functions*/
-extern int init_process_queue(void);
-extern int release_process_queue(void);
 extern int add_process_to_queue(int pid);
 extern int remove_process_from_queue(int pid);
 extern int print_process_queue(void);
-
+extern int get_first_process_in_queue(void);
 
 /**
 	Function Name : process_sched_add_module_read
@@ -53,7 +51,9 @@ static ssize_t process_sched_add_module_read(struct file *file, char *buf, size_
 {
 	
 	printk(KERN_INFO "Process Scheduler Add Module read.\n");
-	print_process_queue();
+	//print_process_queue();
+	printk(KERN_INFO "First PID: %d\n", get_first_process_in_queue());
+	remove_process_from_queue(get_first_process_in_queue());
 	/** Successful execution of read call back. EOF reached.*/
 	return 0;
 }
@@ -153,8 +153,6 @@ static int __init process_sched_add_module_init(void)
 		return -ENOMEM;
 	}
 	
-	/**Initializing the process queue*/
-	init_process_queue();
 	
 	/** Successful execution of initialization method. */
 	return 0;
@@ -170,7 +168,6 @@ static int __init process_sched_add_module_init(void)
 static void __exit process_sched_add_module_cleanup(void)
 {
 	
-	release_process_queue();
 	printk(KERN_INFO "Process Add to Scheduler module is being unloaded.\n");
 	/** Proc FS object removed.*/
 	proc_remove(proc_sched_add_file_entry);

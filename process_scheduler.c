@@ -76,27 +76,14 @@ static void context_switch(void){
 
 
 /**
-	Function Name : round_robin_scheduling_init
-	Function Type : Scheduling Initialization
-	Description   : Initialization method for rounnd robin scheduling scheme.
+	Function Name : round_robin_scheduling
+	Function Type : Scheduling
+	Description   : Method for rounnd robin scheduling scheme.
 */
-int round_robin_scheduling_init(void)
+int round_robin_scheduling(void)
 {
-	printk(KERN_INFO "Round Robin Scheduling scheme initialized.\n");
+	printk(KERN_INFO "Round Robin Scheduling scheme.\n");
 	
-	/** Successful execution of initialization method. */
-	return 0;
-}
-
-/**
-	Function Name : SJF_scheduling_init
-	Function Type : Scheduling Initialization
-	Description   : Initialization method for Shortest Job First scheduling scheme.
-*/
-int SJF_scheduling_init(void)
-{
-	printk(KERN_INFO "Shortest Job Scheduling scheme initialized.\n");
-		
 	/** Successful execution of initialization method. */
 	return 0;
 }

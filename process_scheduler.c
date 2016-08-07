@@ -111,10 +111,12 @@ enum task_status_code task_status_change(int pid, enum process_state eState) {
 
 	if(eState == eRunning) {
 
+		kill_pid(task_pid(current_pr), SIGCONT, 1);
 		printk(KERN_INFO "Task status change to Running\n");
 	}
 	else if(eState == eWaiting) {
 
+		kill_pid(task_pid(current_pr), SIGSTOP, 1);
 		printk(KERN_INFO "Task status change to Waiting\n");
 	}
 	else if(eState == eBlocked) {

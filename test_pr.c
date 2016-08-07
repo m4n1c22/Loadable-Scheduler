@@ -5,5 +5,8 @@ int main() {
  fprintf(fp, "%d", getpid());
  fclose(fp);
 
- while(1);
+ while(1) {
+ 	printf("My pid: %d\n", getpid());
+ 	sleep(1);
+ }
 }

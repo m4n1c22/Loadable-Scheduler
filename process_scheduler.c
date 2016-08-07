@@ -49,7 +49,7 @@ extern int get_first_process_in_queue(void);
 
 /**Function Prototype for Scheduler*/
 static void context_switch(void);
-int round_robin_scheduling(void);
+int static_round_robin_scheduling(void);
 int task_status_change(int pid, enum process_state eState);
 
 /**Flags*/
@@ -81,7 +81,7 @@ static void context_switch(void){
 	
 	printk(KERN_ALERT "Scheduler instance: Context Switch\n");
 
-	round_robin_scheduling();
+	static_round_robin_scheduling();
 
 	/** Condition check for producer unloading flag set or not.*/
 	if (flag == 0){
@@ -130,16 +130,16 @@ enum task_status_code task_status_change(int pid, enum process_state eState) {
 }
 
 /**
-	Function Name : round_robin_scheduling
+	Function Name : static_round_robin_scheduling
 	Function Type : Scheduling Scheme
-	Description   : Method for round robin scheduling scheme.
+	Description   : Method for static round robin scheduling scheme.
 */
-int round_robin_scheduling(void)
+int static_round_robin_scheduling(void)
 {
 
 	enum task_status_code ret_task_status;
 
-	printk(KERN_INFO "Round Robin Scheduling scheme.\n");
+	printk(KERN_INFO "Static Round Robin Scheduling scheme.\n");
 	
 	/**Check if the process selected is a new one.*/
 	if(current_pid == -1) {

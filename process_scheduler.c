@@ -13,7 +13,7 @@
 #include <linux/list.h>
 #include <linux/slab.h>
 #include <linux/workqueue.h>
-
+#include <linux/sched.h>
 
 MODULE_AUTHOR("Sreeram Sadasivam");
 MODULE_DESCRIPTION("Process Scheduler Module");
@@ -32,6 +32,14 @@ enum process_state {
 	eTerminated		=	4  /**Process in Terminate State*/
 };
 
+/**Enumeration for Task Errors*/
+enum task_status_code {
+
+	eTaskStatusExist 		= 	0,
+	eTaskStatusTerminated 	=  -1
+};
+
+
 /**External Function Prototypes for Process Queue Functions*/
 extern int add_process_to_queue(int pid);
 extern int remove_process_from_queue(int pid);
@@ -42,6 +50,7 @@ extern int get_first_process_in_queue(void);
 /**Function Prototype for Scheduler*/
 static void context_switch(void);
 int round_robin_scheduling(void);
+int task_status_change(int pid, enum process_state eState);
 
 /**Flags*/
 static int flag = 0;
@@ -83,14 +92,52 @@ static void context_switch(void){
 		printk(KERN_ALERT "Scheduler instance: scheduler is unloading\n");
 }
 
+/**
+	Function Name : task_status_change
+	Function Type : Task level State change.
+	Description   : Method changes the status of the task.
+*/
+
+enum task_status_code task_status_change(int pid, enum process_state eState) {
+
+	struct task_struct *current_pr;
+	//Perform the actual 
+	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
+
+	if(current_pr == NULL) {
+		remove_process_from_queue(pid);
+		return eTaskStatusTerminated;
+	}
+
+	if(eState == eRunning) {
+
+		printk(KERN_INFO "Task status change to Running\n");
+	}
+	else if(eState == eWaiting) {
+
+		printk(KERN_INFO "Task status change to Waiting\n");
+	}
+	else if(eState == eBlocked) {
+
+		printk(KERN_INFO "Task status change to Blocked\n");
+	}
+	else if(eState == eTerminated) {
+
+		printk(KERN_INFO "Task status change to Terminated\n");
+	}
+
+	return eTaskStatusExist;
+}
 
 /**
 	Function Name : round_robin_scheduling
 	Function Type : Scheduling Scheme
-	Description   : Method for rounnd robin scheduling scheme.
+	Description   : Method for round robin scheduling scheme.
 */
 int round_robin_scheduling(void)
 {
+
+	enum task_status_code ret_task_status;
 
 	printk(KERN_INFO "Round Robin Scheduling scheme.\n");
 	
@@ -101,14 +148,23 @@ int round_robin_scheduling(void)
 
 	/**Check if the process queue is empty.*/
 	if(current_pid != -1) {
-		add_process_to_queue(current_pid);
-
-	
-		//TODO perform the actual task stop and switch to new task
 		
+		//Task status change to wait.
+		ret_task_status = task_status_change(current_pid, eWaiting);
+
+		if(ret_task_status == eTaskStatusExist) {
+			add_process_to_queue(current_pid);
+		}	
+
 		/** Obtaining the first process in the wait queue.*/
 		current_pid = get_first_process_in_queue();
 		remove_process_from_queue(current_pid);
+
+		//Task status change to running.
+		task_status_change(current_pid, eRunning);
+		if(ret_task_status == eTaskStatusTerminated) {
+			current_pid = -1;
+		}
 
 		printk(KERN_INFO "Current Process Queue...\n");
 		print_process_queue();

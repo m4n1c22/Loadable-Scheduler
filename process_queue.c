@@ -119,6 +119,7 @@ int add_process_to_queue(int pid) {
 	*/
 	up(&mutex);
 
+	printk(KERN_INFO "Adding the given Process %d from the  Process Queue...\n", pid);
 
 	return 0;
 }

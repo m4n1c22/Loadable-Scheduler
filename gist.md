@@ -3,4 +3,4 @@ perhaps via kill_pid(task_pid(task_struct), SIGSTOP, 1) and kill_pid(task_pid(ta
 
 ##Expectation
 
-Generate an adaptable design
+Generate an adaptable design to suit

@@ -106,7 +106,7 @@ int add_process_to_queue(int pid) {
 	
 	new_process->pid = pid;
 	
-	new_process->state = eWaiting;
+	new_process->state = eCreated;
 
 	/** 
 		Condition to verify the down operation on the binary semaphore

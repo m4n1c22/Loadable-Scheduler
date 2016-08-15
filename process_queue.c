@@ -31,6 +31,14 @@ enum process_state {
 	eTerminated		=	4  /**Process in Terminate State*/
 };
 
+
+/**Enumeration for Task Errors*/
+enum task_status_code {
+
+	eTaskStatusExist 		= 	0,
+	eTaskStatusTerminated 	=  -1
+};
+
 /** Structure for a process */
 struct proc {
 
@@ -42,6 +50,9 @@ struct proc {
 /**Semaphore for process queue*/
 static struct semaphore mutex;
 
+/**Function Prototypes for Task Queue Functions*/
+enum task_status_code task_status_change(int pid, enum process_state eState);
+enum task_status_code is_task_exists(int pid);
 
 /**Function Prototypes for Process Queue Functions*/
 int init_process_queue(void);
@@ -51,6 +62,7 @@ int remove_process_from_queue(int pid);
 int print_process_queue(void);
 int change_process_state_in_queue(int pid, int changeState);
 int get_first_process_in_queue(void);
+
 /** Process Queue Functions */
 
 /**
@@ -172,6 +184,9 @@ int remove_process_from_queue(int pid) {
 int change_process_state_in_queue(int pid, int changeState) {
 		 	
 	struct proc *tmp, *node;
+
+	enum task_status_code ret_task_status;
+
 	/** 
 		Condition to verify the down operation on the binary semaphore
 		mutex. Entry into a Mutually exclusive block is granted by
@@ -190,6 +205,7 @@ int change_process_state_in_queue(int pid, int changeState) {
 	
 			printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", node->pid);
 			node->state = changeState;
+			task_status_change(node->pid, node->state);
 		}
 	}
 	else {
@@ -199,6 +215,14 @@ int change_process_state_in_queue(int pid, int changeState) {
 				
 				printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", pid);
 				node->state = changeState;
+				if(task_status_change(node->pid, node->state)==eTaskStatusTerminated) {
+					node->state = eTerminated;
+				}				
+			}
+			else {
+				if(is_task_exists(node->pid)==eTaskStatusTerminated) {
+					node->state = eTerminated;
+				}
 			}
 		}
 	}
@@ -272,7 +296,7 @@ int get_first_process_in_queue(void) {
 	}	
 
 	list_for_each_entry(tmp, &(top.list), list) {
-		if(pid==-1) {
+		if((pid==-1)&&(tmp->state != eTerminated)) {
 			pid = tmp->pid;	
 		}
 	}
@@ -286,6 +310,62 @@ int get_first_process_in_queue(void) {
 	/**Returns the first process ID*/
 	return pid;
 }
+
+/**
+	Function Name : is_task_exists
+	Function Type : Task level Existence
+	Description   : Method checks if the task exists.
+*/
+enum task_status_code is_task_exists(int pid) {
+	struct task_struct *current_pr;
+	//Perform the actual 
+	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
+	if(current_pr == NULL) {
+		
+		return eTaskStatusTerminated;
+	}
+	reurn eTaskStatusExist;
+}
+
+
+/**
+	Function Name : task_status_change
+	Function Type : Task level State change.
+	Description   : Method changes the status of the task.
+*/
+enum task_status_code task_status_change(int pid, enum process_state eState) {
+
+	struct task_struct *current_pr;
+	//Perform the actual 
+	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
+
+	if(current_pr == NULL) {
+		
+		return eTaskStatusTerminated;
+	}
+
+	if(eState == eRunning) {
+
+		kill_pid(task_pid(current_pr), SIGCONT, 1);
+		printk(KERN_INFO "Task status change to Running\n");
+	}
+	else if(eState == eWaiting) {
+
+		kill_pid(task_pid(current_pr), SIGSTOP, 1);
+		printk(KERN_INFO "Task status change to Waiting\n");
+	}
+	else if(eState == eBlocked) {
+
+		printk(KERN_INFO "Task status change to Blocked\n");
+	}
+	else if(eState == eTerminated) {
+
+		printk(KERN_INFO "Task status change to Terminated\n");
+	}
+
+	return eTaskStatusExist;
+}
+
 
 /**
 	Function Name : process_queue_module_init

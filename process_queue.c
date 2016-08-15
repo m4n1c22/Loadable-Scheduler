@@ -380,13 +380,11 @@ enum task_status_code task_status_change(int pid, enum process_state eState) {
 
 	struct task_struct *current_pr;
 
-	if(is_task_exists(pid)==eTaskStatusTerminated) {
+	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
+	if(current_pr == NULL) {
 		
 		return eTaskStatusTerminated;
 	}
-
-	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
-
 
 	if(eState == eRunning) {
 

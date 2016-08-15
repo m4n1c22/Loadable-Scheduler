@@ -97,12 +97,7 @@ int static_round_robin_scheduling(void)
 
 	printk(KERN_INFO "Static Round Robin Scheduling scheme.\n");
 	
-	remove_terminated_processes_from_queue();
-
-	/**Check if the process selected is a new one.*/
-	if(current_pid == -1) {
-		current_pid = get_first_process_in_queue();
-	}
+	//remove_terminated_processes_from_queue();
 
 	/**Check if the process queue is empty.*/
 	if(current_pid != -1) {
@@ -113,22 +108,24 @@ int static_round_robin_scheduling(void)
 		if(ret_process_state == eTerminated) {
 			remove_process_from_queue(current_pid);
 		}
+	}
 
-		/** Obtaining the first process in the wait queue.*/
-		do {
-			current_pid = get_first_process_in_queue();
-			if(current_pid == -1) {
-				break;
-			}
-			ret_process_state = change_process_state_in_queue(current_pid, eRunning);
-			remove_process_from_queue(current_pid);
-		}while(ret_process_state == eTerminated);
-
+	/** Obtaining the first process in the wait queue.*/
+	do {
+		current_pid = get_first_process_in_queue();
+		if(current_pid == -1) {
+			break;
+		}
+		ret_process_state = change_process_state_in_queue(current_pid, eRunning);
+		remove_process_from_queue(current_pid);
+	}while(ret_process_state == eTerminated);
+	
+	if(current_pid != -1) {
 		printk(KERN_INFO "Current Process Queue...\n");
 		print_process_queue();
 		printk(KERN_INFO "Currently running process: %d\n", current_pid);
+	}
 	
-	}	
 	
 	/** Successful execution of initialization method. */
 	return 0;

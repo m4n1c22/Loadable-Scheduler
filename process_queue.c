@@ -13,7 +13,7 @@
 #include <linux/kernel.h>
 #include <linux/list.h>
 #include <linux/slab.h>
-
+#include <linux/sched.h>
 MODULE_AUTHOR("Sreeram Sadasivam");
 MODULE_DESCRIPTION("Process Queue Module");
 MODULE_LICENSE("GPL");
@@ -200,7 +200,7 @@ int remove_terminated_processes_from_queue(void) {
 	list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
 		if(node->state == eTerminated) {
-			printk(KERN_INFO "Removing the given Process %d from the  Process Queue...\n", pid);
+			printk(KERN_INFO "Removing the terminated Process %d from the  Process Queue...\n", node->pid);
 			list_del(&node->list);
 			kfree(node);
 		}
@@ -367,7 +367,7 @@ enum task_status_code is_task_exists(int pid) {
 		
 		return eTaskStatusTerminated;
 	}
-	reurn eTaskStatusExist;
+	return eTaskStatusExist;
 }
 
 
@@ -379,13 +379,14 @@ enum task_status_code is_task_exists(int pid) {
 enum task_status_code task_status_change(int pid, enum process_state eState) {
 
 	struct task_struct *current_pr;
-	//Perform the actual 
-	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
 
-	if(current_pr == NULL) {
+	if(is_task_exists(pid)==eTaskStatusTerminated) {
 		
 		return eTaskStatusTerminated;
 	}
+
+	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
+
 
 	if(eState == eRunning) {
 

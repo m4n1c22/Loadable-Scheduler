@@ -109,20 +109,20 @@ int static_round_robin_scheduling(void)
 			
 		add_process_to_queue(current_pid);
 		ret_process_state = change_process_state_in_queue(current_pid, eWaiting);
-		do {
+		
+		if(ret_process_state == eTerminated) {
 			remove_process_from_queue(current_pid);
-			ret_process_state = change_process_state_in_queue(current_pid, eWaiting);
-		}while(ret_process_state == eTerminated);		
+		}
 
 		/** Obtaining the first process in the wait queue.*/
-		current_pid = get_first_process_in_queue();
-		ret_process_state = change_process_state_in_queue(current_pid, eRunning);
-		remove_process_from_queue(current_pid);
-
-		//Task status change to running.
-		if(ret_task_status == eTaskStatusTerminated) {
-			current_pid = -1;
-		}
+		do {
+			current_pid = get_first_process_in_queue();
+			if(current_pid == -1) {
+				break;
+			}
+			ret_process_state = change_process_state_in_queue(current_pid, eRunning);
+			remove_process_from_queue(current_pid);
+		}while(ret_process_state == eTerminated);
 
 		printk(KERN_INFO "Current Process Queue...\n");
 		print_process_queue();

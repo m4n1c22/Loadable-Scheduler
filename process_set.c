@@ -94,7 +94,7 @@ static ssize_t process_sched_add_module_write(struct file *file, const char *buf
 	}
 	
 	add_process_to_queue(new_proc_id);
-	change_process_state_in_queue(new_proc_id, eWaiting);
+	//change_process_state_in_queue(new_proc_id, eWaiting);
 	/** Successful execution of write call back.*/
 	return count;
 }

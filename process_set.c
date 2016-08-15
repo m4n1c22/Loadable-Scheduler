@@ -25,6 +25,16 @@ MODULE_LICENSE("GPL");
 /** STANDARD MACROS */
 #define BASE_10 		10
 
+/**Enumeration for Process States*/
+enum process_state {
+	
+	eCreated		=	0, /**Process in Created State*/
+	eRunning		=	1, /**Process in Running State*/
+	eWaiting		=	2, /**Process in Waiting State*/
+	eBlocked		=	3, /**Process in Blocked State*/
+	eTerminated		=	4  /**Process in Terminate State*/
+};
+
 
 /** Proc FS Dir Object */
 static struct proc_dir_entry *proc_sched_add_file_entry;
@@ -35,7 +45,8 @@ extern int add_process_to_queue(int pid);
 extern int remove_process_from_queue(int pid);
 extern int print_process_queue(void);
 extern int get_first_process_in_queue(void);
-
+extern int remove_terminated_processes_from_queue(void);
+extern int change_process_state_in_queue(int pid, int changeState);
 /**
 	Function Name : process_sched_add_module_read
 	Function Type : Kernel Callback Method
@@ -53,7 +64,6 @@ static ssize_t process_sched_add_module_read(struct file *file, char *buf, size_
 	printk(KERN_INFO "Process Scheduler Add Module read.\n");
 	//print_process_queue();
 	printk(KERN_INFO "First PID: %d\n", get_first_process_in_queue());
-	remove_process_from_queue(get_first_process_in_queue());
 	/** Successful execution of read call back. EOF reached.*/
 	return 0;
 }
@@ -84,7 +94,7 @@ static ssize_t process_sched_add_module_write(struct file *file, const char *buf
 	}
 	
 	add_process_to_queue(new_proc_id);
-	
+	change_process_state_in_queue(new_proc_id, eWaiting);
 	/** Successful execution of write call back.*/
 	return count;
 }

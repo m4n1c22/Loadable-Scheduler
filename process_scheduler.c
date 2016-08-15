@@ -40,6 +40,7 @@ extern int remove_process_from_queue(int pid);
 extern int print_process_queue(void);
 extern int change_process_state_in_queue(int pid, int changeState);
 extern int get_first_process_in_queue(void);
+extern int remove_terminated_processes_from_queue(void);
 
 /**Function Prototype for Scheduler*/
 static void context_switch(void);
@@ -96,6 +97,8 @@ int static_round_robin_scheduling(void)
 
 	printk(KERN_INFO "Static Round Robin Scheduling scheme.\n");
 	
+	remove_terminated_processes_from_queue();
+
 	/**Check if the process selected is a new one.*/
 	if(current_pid == -1) {
 		current_pid = get_first_process_in_queue();
@@ -103,10 +106,13 @@ int static_round_robin_scheduling(void)
 
 	/**Check if the process queue is empty.*/
 	if(current_pid != -1) {
-		
-	
+			
 		add_process_to_queue(current_pid);
-		ret_process_state = change_process_state_in_queue(current_pid, eWaiting);		
+		ret_process_state = change_process_state_in_queue(current_pid, eWaiting);
+		do {
+			remove_process_from_queue(current_pid);
+			ret_process_state = change_process_state_in_queue(current_pid, eWaiting);
+		}while(ret_process_state == eTerminated);		
 
 		/** Obtaining the first process in the wait queue.*/
 		current_pid = get_first_process_in_queue();

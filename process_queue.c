@@ -62,6 +62,7 @@ int remove_process_from_queue(int pid);
 int print_process_queue(void);
 int change_process_state_in_queue(int pid, int changeState);
 int get_first_process_in_queue(void);
+int remove_terminated_processes_from_queue(void);
 
 /** Process Queue Functions */
 
@@ -176,6 +177,45 @@ int remove_process_from_queue(int pid) {
 }
 
 /**
+	Function Name : remove_terminated_processes_from_queue
+	Function Type : Queue Job
+	Description	  :	Method is invoked for removing all terminated processes
+					from the queue.
+*/
+int remove_terminated_processes_from_queue(void) {
+		 	
+	struct proc *tmp, *node;
+	/** 
+		Condition to verify the down operation on the binary semaphore
+		mutex. Entry into a Mutually exclusive block is granted by
+		having a successful lock with the mentioned semaphore.
+		mutex semaphore provides a safe access to the following
+		critical section.
+	*/
+	if(down_interruptible(&mutex)){
+		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from remove function");
+		/** Issue a restart of syscall which was supposed to be executed.*/
+		return -ERESTARTSYS;
+	}	
+	list_for_each_entry_safe(node, tmp, &(top.list), list) {
+	
+		if(node->state == eTerminated) {
+			printk(KERN_INFO "Removing the given Process %d from the  Process Queue...\n", pid);
+			list_del(&node->list);
+			kfree(node);
+		}
+	}
+	/** 
+		Performing an up operation on mutex. Such an operation
+		indicates the critical section is released for other
+		processes/threads.
+	*/
+	up(&mutex);
+
+	return 0;
+}
+
+/**
 	Function Name : change_process_state_in_queue
 	Function Type : Queue Function
 	Description	  :	Method is invoked for changing the process state 
@@ -185,7 +225,7 @@ int change_process_state_in_queue(int pid, int changeState) {
 		 	
 	struct proc *tmp, *node;
 
-	enum task_status_code ret_task_status;
+	enum process_state ret_process_change_status;
 
 	/** 
 		Condition to verify the down operation on the binary semaphore
@@ -205,7 +245,9 @@ int change_process_state_in_queue(int pid, int changeState) {
 	
 			printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", node->pid);
 			node->state = changeState;
-			task_status_change(node->pid, node->state);
+			if(task_status_change(node->pid, node->state)==eTaskStatusTerminated) {
+					node->state = eTerminated;
+			}
 		}
 	}
 	else {
@@ -217,6 +259,7 @@ int change_process_state_in_queue(int pid, int changeState) {
 				node->state = changeState;
 				if(task_status_change(node->pid, node->state)==eTaskStatusTerminated) {
 					node->state = eTerminated;
+					ret_process_change_status = eTerminated;
 				}				
 			}
 			else {
@@ -233,7 +276,7 @@ int change_process_state_in_queue(int pid, int changeState) {
 	*/
 	up(&mutex);
 
-	return 0;
+	return ret_process_change_status;
 }
 
 
@@ -296,7 +339,7 @@ int get_first_process_in_queue(void) {
 	}	
 
 	list_for_each_entry(tmp, &(top.list), list) {
-		if((pid==-1)&&(tmp->state != eTerminated)) {
+		if((pid==-1)&&(is_task_exists(tmp->pid)==eTaskStatusExist)) {
 			pid = tmp->pid;	
 		}
 	}
@@ -416,3 +459,4 @@ EXPORT_SYMBOL_GPL(remove_process_from_queue);
 EXPORT_SYMBOL_GPL(print_process_queue);
 EXPORT_SYMBOL_GPL(get_first_process_in_queue);
 EXPORT_SYMBOL_GPL(change_process_state_in_queue);
+EXPORT_SYMBOL_GPL(remove_terminated_processes_from_queue);

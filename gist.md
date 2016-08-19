@@ -5,4 +5,4 @@ perhaps via kill_pid(task_pid(task_struct), SIGSTOP, 1) and kill_pid(task_pid(ta
 ##Expectation
 
 - Generate an adaptable design which can handle variable CPU workloads. 
-- The system should provide an adaptive design which act as a container class/structure for the problem
+- The system should provide an adaptive design which act as a container class/structure for the problem.

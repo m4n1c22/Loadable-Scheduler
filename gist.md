@@ -11,4 +11,5 @@ perhaps via kill_pid(task_pid(task_struct), SIGSTOP, 1) and kill_pid(task_pid(ta
 ##Some related work:
 
 1. http://www.cs.utah.edu/~regehr/papers/diss/regehr-diss-single.pdf
-2. 
+2. http://www.cs.utah.edu/~regehr/papers/sosp00_wip/
+3. http://www.cs.utah.edu/~regehr/papers/augmented/augmented-rtas01.pdf

@@ -102,24 +102,18 @@ int static_round_robin_scheduling(void)
 	/**Check if the process queue is empty.*/
 	if(current_pid != -1) {
 			
-		add_process_to_queue(current_pid);
-		ret_process_state = change_process_state_in_queue(current_pid, eWaiting);
-		
-		if(ret_process_state == eTerminated) {
-			remove_process_from_queue(current_pid);
-		}
+		add_process_to_queue(current_pid);	
 	}
 
 	/** Obtaining the first process in the wait queue.*/
-	do {
-		current_pid = get_first_process_in_queue();
-		if(current_pid == -1) {
-			break;
-		}
+	current_pid = get_first_process_in_queue();
+	if(current_pid != -1) {
 		ret_process_state = change_process_state_in_queue(current_pid, eRunning);
 		remove_process_from_queue(current_pid);
-	}while(ret_process_state == eTerminated);
+	}
 	
+	printk(KERN_INFO "Currently running process: %d\n", current_pid);
+
 	if(current_pid != -1) {
 		printk(KERN_INFO "Current Process Queue...\n");
 		print_process_queue();

@@ -344,6 +344,9 @@ int get_first_process_in_queue(void) {
 		if((pid==-1)&&(is_task_exists(tmp->pid)==eTaskStatusExist)) {
 			pid = tmp->pid;	
 		}
+		/*else if(is_task_exists(tmp->pid)==eTaskStatusTerminated) {
+			tmp->state = eTerminated;
+		}*/
 	}
 	/** 
 		Performing an up operation on mutex. Such an operation

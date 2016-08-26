@@ -134,7 +134,7 @@ int add_process_to_queue(int pid) {
 	*/
 	up(&mutex);
 
-	printk(KERN_INFO "Adding the given Process %d from the  Process Queue...\n", pid);
+	printk(KERN_INFO "Adding the given Process %d to the  Process Queue...\n", pid);
 
 	return 0;
 }
@@ -430,7 +430,6 @@ static int __init process_queue_module_init(void)
 		as 1. Indicates the critical section is free from use.
 	*/
 	sema_init(&mutex,1); 		
-	/** Successful execution of initialization method. */
 	
 	/**Initializing the process queue*/
 	init_process_queue();

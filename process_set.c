@@ -63,7 +63,7 @@ static ssize_t process_sched_add_module_read(struct file *file, char *buf, size_
 	
 	printk(KERN_INFO "Process Scheduler Add Module read.\n");
 	//print_process_queue();
-	printk(KERN_INFO "First PID: %d\n", get_first_process_in_queue());
+	printk(KERN_INFO "Next Executable PID in the list if RR Scheduling: %d\n", get_first_process_in_queue());
 	/** Successful execution of read call back. EOF reached.*/
 	return 0;
 }

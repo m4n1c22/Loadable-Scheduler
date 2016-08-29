@@ -35,6 +35,12 @@ enum process_state {
 	eTerminated		=	4  /**Process in Terminate State*/
 };
 
+/**Enumeration for Function Execution*/
+enum execution {
+
+	eExecFailed 	= 	-1, /**Function executed failed.*/
+	eExecSuccess 	=	 0  /**Function executed successfully.*/
+};
 
 /** Proc FS Dir Object */
 static struct proc_dir_entry *proc_sched_add_file_entry;
@@ -93,8 +99,15 @@ static ssize_t process_sched_add_module_write(struct file *file, const char *buf
 		return -EINVAL;
 	}
 	
-	add_process_to_queue(new_proc_id);
-	//change_process_state_in_queue(new_proc_id, eWaiting);
+	/**	Add process to the process queue.*/
+	ret = add_process_to_queue(new_proc_id);
+	/**Check if the add process to queue method was successful or not.*/
+	if(ret != eExecSuccess) {
+		printk(KERN_ALERT "Process Set ERROR:add_process_to_queue function failed from sched set write method");
+		/** Add process to queue error.*/
+		return -ENOMEM;
+	}
+
 	/** Successful execution of write call back.*/
 	return count;
 }

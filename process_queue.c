@@ -20,6 +20,7 @@ MODULE_LICENSE("GPL");
 
 /**Macros*/
 #define ALL_REG_PIDS	-100
+#define	INVALID_PID		-1
 
 /**Enumeration for Process States*/
 enum process_state {
@@ -345,7 +346,7 @@ int print_process_queue(void) {
 		/** Issue a restart of syscall which was supposed to be executed.*/
 		return -ERESTARTSYS;
 	}	
-
+	/**Iterate over the queue and print each process id.*/
 	list_for_each_entry(tmp, &(top.list), list) {
 	
 		printk(KERN_INFO "Process ID: %d\n", tmp->pid);
@@ -356,7 +357,7 @@ int print_process_queue(void) {
 		processes/threads.
 	*/
 	up(&mutex);
-
+	/**Function executed successfully.*/
 	return 0;
 }
 
@@ -368,7 +369,8 @@ int print_process_queue(void) {
 int get_first_process_in_queue(void) {
 
 	struct proc *tmp;
-	int pid = -1;
+	/**Initially set the process id value as an INVALID value.*/
+	int pid = INVALID_PID;
 	/** 
 		Condition to verify the down operation on the binary semaphore
 		mutex. Entry into a Mutually exclusive block is granted by
@@ -382,8 +384,11 @@ int get_first_process_in_queue(void) {
 		return -ERESTARTSYS;
 	}	
 
+	/**Iterate over the process queue and find the first active process.*/
 	list_for_each_entry(tmp, &(top.list), list) {
-		if((pid==-1)&&(is_task_exists(tmp->pid)==eTaskStatusExist)) {
+		/**Check if the task associated with the process is terminated or not.*/
+		if((pid==INVALID_PID)&&(is_task_exists(tmp->pid)==eTaskStatusExist)) {
+			/**Set the process id to read process.*/
 			pid = tmp->pid;	
 		}
 		/*else if(is_task_exists(tmp->pid)==eTaskStatusTerminated) {
@@ -407,13 +412,17 @@ int get_first_process_in_queue(void) {
 	Description   : Method checks if the task exists.
 */
 enum task_status_code is_task_exists(int pid) {
-	struct task_struct *current_pr;
-	//Perform the actual 
+	
+	/**Task structure construct.*/
+	struct task_struct *current_pr;	
+	/**Obtain the task struct associated with provided PID.*/
 	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
+	/**Check if the task exists or not by checking for NULL Value.*/
 	if(current_pr == NULL) {
-		
+		/**Return the task status code as terminated.*/
 		return eTaskStatusTerminated;
 	}
+	/**Return the task status code as exists.*/
 	return eTaskStatusExist;
 }
 
@@ -425,33 +434,39 @@ enum task_status_code is_task_exists(int pid) {
 */
 enum task_status_code task_status_change(int pid, enum process_state eState) {
 
+	/**Task structure construct.*/
 	struct task_struct *current_pr;
-
+	/**Obtain the task struct associated with provided PID.*/
 	current_pr = pid_task(find_vpid(pid), PIDTYPE_PID);
+	/**Check if the task exists or not by checking for NULL Value.*/
 	if(current_pr == NULL) {
-		
+		/**Return the task status code as terminated.*/
 		return eTaskStatusTerminated;
 	}
-
+	/**Check if the state change was Running.*/
 	if(eState == eRunning) {
 
+		/**Trigger a signal to continue the given task associated with the process.*/
 		kill_pid(task_pid(current_pr), SIGCONT, 1);
 		printk(KERN_INFO "Task status change to Running\n");
 	}
+	/**Check if the state change was Waiting.*/
 	else if(eState == eWaiting) {
-
+		/**Trigger a signal to pause the given task associated with the process.*/
 		kill_pid(task_pid(current_pr), SIGSTOP, 1);
 		printk(KERN_INFO "Task status change to Waiting\n");
 	}
+	/**Check if the state change was Blocked.*/
 	else if(eState == eBlocked) {
 
 		printk(KERN_INFO "Task status change to Blocked\n");
 	}
+	/**Check if the state change was Terminated.*/
 	else if(eState == eTerminated) {
 
 		printk(KERN_INFO "Task status change to Terminated\n");
 	}
-
+	/**Return the task status code as exists.*/
 	return eTaskStatusExist;
 }
 

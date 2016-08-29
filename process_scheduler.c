@@ -75,6 +75,7 @@ static void context_switch(void){
 	
 	printk(KERN_ALERT "Scheduler instance: Context Switch\n");
 
+	/**Invoking the static round robin scheduling policy.*/
 	static_round_robin_scheduling();
 
 	/** Condition check for producer unloading flag set or not.*/
@@ -93,35 +94,44 @@ static void context_switch(void){
 */
 int static_round_robin_scheduling(void)
 {
+	/**Storage class variable to detecting the process state change.*/
 	int ret_process_state=-1;
 
 	printk(KERN_INFO "Static Round Robin Scheduling scheme.\n");
 	
 	//remove_terminated_processes_from_queue();
 
-	/**Check if the process queue is empty.*/
+	/**Check if the current process id is INVALID or not.*/
 	if(current_pid != -1) {
-			
+		/**Add the current process to the process queue.*/	
 		add_process_to_queue(current_pid);	
 	}
 
 	/** Obtaining the first process in the wait queue.*/
 	current_pid = get_first_process_in_queue();
+	/**
+		Check if the obtained process id is invalid or not. If Invalid indicates,
+		the queue does not contain any active process.
+	*/
 	if(current_pid != -1) {
+		/**Change the process state of the obtained process from queue to running.*/
 		ret_process_state = change_process_state_in_queue(current_pid, eRunning);
+		/**Remove the process from the waiting queue.*/
 		remove_process_from_queue(current_pid);
 	}
 	
 	printk(KERN_INFO "Currently running process: %d\n", current_pid);
 
+	/**Check if there no processes active in the scheduler or not.*/
 	if(current_pid != -1) {
 		printk(KERN_INFO "Current Process Queue...\n");
+		/**Print the wait queue.*/
 		print_process_queue();
 		printk(KERN_INFO "Currently running process: %d\n", current_pid);
 	}
 	
 	
-	/** Successful execution of initialization method. */
+	/** Successful execution of the method. */
 	return 0;
 }
 

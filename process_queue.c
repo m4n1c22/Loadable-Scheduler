@@ -35,16 +35,17 @@ enum process_state {
 /**Enumeration for Task Errors*/
 enum task_status_code {
 
-	eTaskStatusExist 		= 	0,
-	eTaskStatusTerminated 	=  -1
+	eTaskStatusExist 		= 	0,	/**Task is still active in the OS.*/
+	eTaskStatusTerminated 	=  -1   /**Task has terminated.1*/
 };
 
 /** Structure for a process */
 struct proc {
 
-	int pid;
-	enum process_state state;
-	struct list_head list;
+	int pid; 					/**Process ID*/
+	enum process_state state;	/**Process State*/
+	struct list_head list;		/**List pointer for generating a list of processes.*/
+	/**More things to come in future such as nice value, priority etc,.*/
 }top;
 
 /**Semaphore for process queue*/
@@ -74,6 +75,7 @@ int remove_terminated_processes_from_queue(void);
 int init_process_queue(void) {
 
 	printk(KERN_INFO "Initializing the Process Queue...\n");
+	/**Generating the head of the queue and initializing an empty process queue.*/
 	INIT_LIST_HEAD(&top.list);
 	return 0;
 }
@@ -87,11 +89,18 @@ int release_process_queue(void) {
 		 	
 	struct proc *tmp, *node;
 	printk(KERN_INFO "Releasing Process Queue...\n");
+	/**
+		Iterating over the list of nodes pertaining to the process information
+		and removing one by one.
+	*/
 	list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
+		/**Deleting link pointer established by the node to the list.*/
 		list_del(&node->list);
+		/**Removing the whole node.*/
 		kfree(node);
 	}
+	/**Function returns success.*/
 	return 0;
 }
 
@@ -102,13 +111,22 @@ int release_process_queue(void) {
 */
 int add_process_to_queue(int pid) {
 			
+	/**Allocating space for the newly registered process.*/
 	struct proc *new_process = kmalloc(sizeof(struct proc), GFP_KERNEL);
 	
-	new_process->pid = pid;
-	
-	new_process->state = eWaiting;
+	/**Check if the kmalloc call was successful or not.*/	
+	if(!new_process) {
 
-	task_status_change(new_process->pid, new_process-> state);
+		printk(KERN_ALERT "Process Queue ERROR:kmalloc function failed from add_process_to_queue function.");
+		/** Add process to queue error.*/
+		return -ENOMEM;
+	}
+	/**Setting the process id to the process info node new_process*/
+	new_process->pid = pid;
+	/**Setting the process state to the process info node new_process as waiting.*/
+	new_process->state = eWaiting;
+	/**Make the task level alteration therefore the process pauses its execution since in wait state.*/
+	task_status_change(new_process->pid, new_process-> state);//TODO:Error handling to be added.
 
 	/** 
 		Condition to verify the down operation on the binary semaphore
@@ -123,8 +141,9 @@ int add_process_to_queue(int pid) {
 		return -ERESTARTSYS;
 	}
 
+	/**Initialize the new process list as the new head.*/
 	INIT_LIST_HEAD(&new_process->list);
-	
+	/**Set the new process as a tail to the previous top of the list.*/
 	list_add_tail(&(new_process->list), &(top.list));
 	
 	/** 
@@ -135,7 +154,7 @@ int add_process_to_queue(int pid) {
 	up(&mutex);
 
 	printk(KERN_INFO "Adding the given Process %d to the  Process Queue...\n", pid);
-
+	/**Function executed successfully.*/
 	return 0;
 }
 
@@ -159,12 +178,16 @@ int remove_process_from_queue(int pid) {
 		printk(KERN_ALERT "Process Queue ERROR:Mutual Exclusive position access failed from remove function");
 		/** Issue a restart of syscall which was supposed to be executed.*/
 		return -ERESTARTSYS;
-	}	
+	}
+	/**Iterating over the process queue and removing the process with provided pid.*/	
 	list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
+		/**Check if the node pid is the same as the required pid.*/
 		if(node->pid == pid) {
 			printk(KERN_INFO "Removing the given Process %d from the  Process Queue...\n", pid);
+			/**Deleting link pointer established by the node to the list.*/
 			list_del(&node->list);
+			/**Removing the whole node.*/
 			kfree(node);
 		}
 	}
@@ -174,7 +197,7 @@ int remove_process_from_queue(int pid) {
 		processes/threads.
 	*/
 	up(&mutex);
-
+	/**Function executed successfully.*/
 	return 0;
 }
 
@@ -199,11 +222,15 @@ int remove_terminated_processes_from_queue(void) {
 		/** Issue a restart of syscall which was supposed to be executed.*/
 		return -ERESTARTSYS;
 	}	
+	/**Iterate over the process queue and remove all terminated processes from the queue.*/
 	list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
+		/**Check if the process is terminated or not.*/
 		if(node->state == eTerminated) {
 			printk(KERN_INFO "Removing the terminated Process %d from the  Process Queue...\n", node->pid);
+			/**Deleting link pointer established by the node to the list.*/
 			list_del(&node->list);
+			/**Removing the whole node.*/
 			kfree(node);
 		}
 	}
@@ -213,7 +240,7 @@ int remove_terminated_processes_from_queue(void) {
 		processes/threads.
 	*/
 	up(&mutex);
-
+	/**Function executed successfully.*/
 	return 0;
 }
 
@@ -227,6 +254,7 @@ int change_process_state_in_queue(int pid, int changeState) {
 		 	
 	struct proc *tmp, *node;
 
+	/**Enumeration to expect the task_status change function call.*/
 	enum process_state ret_process_change_status;
 
 	/** 
@@ -243,29 +271,42 @@ int change_process_state_in_queue(int pid, int changeState) {
 	}	
 	/**Check if all registered PIDs are modified for state*/
 	if(pid == ALL_REG_PIDS) {
+		/**Iterate over all the processes in the queue and set the status the provided status.*/
 		list_for_each_entry_safe(node, tmp, &(top.list), list) {
 	
 			printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", node->pid);
+			/**Update the state to the provided state.*/
 			node->state = changeState;
+			/**Check if the task associated with the iterated node still exists or not.*/
 			if(task_status_change(node->pid, node->state)==eTaskStatusTerminated) {
-					node->state = eTerminated;
+				/**Change state to terminated. Later handled by calling removeallterminated processes method*/	
+				node->state = eTerminated;
 			}
 		}
 	}
 	else {
+		/**Iterate over the queue and update the provided process with the state change.*/
 		list_for_each_entry_safe(node, tmp, &(top.list), list) {
 		
+			/**Check if the iterated node is the required process or not.*/
 			if(node->pid == pid) {
 				
 				printk(KERN_INFO "Updating the process state the Process %d in  Process Queue...\n", pid);
+				/**Update the state to the provided state.*/
 				node->state = changeState;
+				/**Check if the task associated with the iterated node still exists or not.*/
 				if(task_status_change(node->pid, node->state)==eTaskStatusTerminated) {
+					/**Change state to terminated. Later handled by calling removeallterminated processes method*/	
 					node->state = eTerminated;
+					/**Return value updated to notify that the requested process is already terminated.*/
 					ret_process_change_status = eTerminated;
-				}				
+				}
+				//TODO:Else condition to be added.				
 			}
 			else {
+				/**Check if the task associated with the iterated node exists or not.*/
 				if(is_task_exists(node->pid)==eTaskStatusTerminated) {
+					/**Change state to terminated. Later handled by calling removeallterminated processes method*/
 					node->state = eTerminated;
 				}
 			}
@@ -278,6 +319,7 @@ int change_process_state_in_queue(int pid, int changeState) {
 	*/
 	up(&mutex);
 
+	/**Return the process status change associated with the internal call to task status change method.*/
 	return ret_process_change_status;
 }
 

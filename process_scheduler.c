@@ -99,7 +99,7 @@ int static_round_robin_scheduling(void)
 
 	printk(KERN_INFO "Static Round Robin Scheduling scheme.\n");
 	
-	//remove_terminated_processes_from_queue();
+	remove_terminated_processes_from_queue();
 
 	/**Check if the current process id is INVALID or not.*/
 	if(current_pid != -1) {

@@ -32,10 +32,7 @@ to use the LKM based scheduler.
 - Open a terminal and go to the location where the git cloning was performed.
 - Compile the LKM by running the Makefile. Run `make` to compile the source code related to LKM. If needed a clean build, run `make clean` before default `make`.
 - After successful compilation of Makefile, you would witness .ko files in the folder. These files are kernel object files for LKM related aspects.
-- Now run the script insmod_scr.sh as `sh insmod_scr.sh`. The execution of above script will insert the kernel modules process_set, process_scheduler and process_queue to set of kernel modules. After this step the LKM is loaded. You can run `dmesg` to verify if the insertion was successful or not.
-- Now compile the test_pr.c source file. This source code can be compiled before the LKM compilation process. But you cannot execute it before the above LKM is loaded. Compilation is done by runnning `gcc test_pr.c -o test_pr.out`
-- After successful compilation, open two new terminals in the same location and run the test_pr.out in those terminals with the command `./test_pr.out`. Note: the test_pr.out will execute infinitely, therefore you will need to terminate it manually.
+- Now run the script insmod_scr.sh as `sh insmod_scr.sh` or you can run `make load` which would compile and load the kernel modules. The execution of above script will only insert the kernel modules process_set, process_scheduler and process_queue to set of kernel modules. After this step the LKM is loaded. You can run `dmesg` to verify if the insertion was successful or not.
+- Now compile the test_pr.c source file. This source code can be compiled before the LKM compilation process. But you cannot execute it before the above LKM is loaded. Compilation is done by runnning `make comp_test` or you can compile and run using command `make test`.
+- After successful compilation, open two new terminals in the same location and run the test_pr.out in those terminals with the command `./test_pr.out` or `make test`. Note: the test_pr.out will execute infinitely, therefore you will need to terminate it manually.
 - Now you can witness the effect of the scheduler within seconds. Currently the scheme used is static round robin scheme with time quantum of 3 secs.
-
-###Future Outlook
-- Adaptive design adhering to environmental load.

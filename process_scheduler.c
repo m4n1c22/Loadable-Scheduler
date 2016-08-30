@@ -99,6 +99,7 @@ int static_round_robin_scheduling(void)
 
 	printk(KERN_INFO "Static Round Robin Scheduling scheme.\n");
 	
+	/**Removing all terminated process from the queue.*/
 	remove_terminated_processes_from_queue();
 
 	/**Check if the current process id is INVALID or not.*/

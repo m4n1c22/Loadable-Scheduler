@@ -8,3 +8,5 @@
 .tmp_versions*
 *.out
 *.exe
+*.bin
+*.c~

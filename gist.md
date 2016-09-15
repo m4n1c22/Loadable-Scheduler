@@ -10,4 +10,5 @@ perhaps via kill_pid(task_pid(task_struct), SIGSTOP, 1) and kill_pid(task_pid(ta
 
 ##Some References:
 - http://ieeexplore.ieee.org/xpls/icp.jsp?arnumber=6029866
+- http://ieeexplore.ieee.org/xpls/icp.jsp?arnumber=7280137
 - 

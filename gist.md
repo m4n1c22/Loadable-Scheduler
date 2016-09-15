@@ -7,3 +7,7 @@ perhaps via kill_pid(task_pid(task_struct), SIGSTOP, 1) and kill_pid(task_pid(ta
 - Generate an adaptable design which can handle variable CPU workloads. 
 - The system should provide an adaptive design which act as a container class/structure for the problem.
 - Potential Cloning possibility of the scheduler module
+
+##Some References:
+- http://ieeexplore.ieee.org/xpls/icp.jsp?arnumber=6029866
+- 

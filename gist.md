@@ -9,4 +9,3 @@ perhaps via kill_pid(task_pid(task_struct), SIGSTOP, 1) and kill_pid(task_pid(ta
 - Potential Cloning possibility of the scheduler module
 
 ##Some References:
-- http://dl.acm.org/citation.cfm?id=1400102

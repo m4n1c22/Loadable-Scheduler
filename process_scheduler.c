@@ -50,7 +50,7 @@ int static_round_robin_scheduling(void);
 static int flag = 0;
 
 /**Time Quantum storage variable for pre-emptive based schedulers.*/
-static int time_quantum;
+static int time_quantum=3;
 
 /**Current PID*/
 static int current_pid = -1;
@@ -149,9 +149,6 @@ static int __init process_scheduler_module_init(void)
 	/** Boolean status of the queue.*/
 	bool q_status=false;
 
-	/**Initializing the time_quantum*/
-	time_quantum = 3;
-
 	printk(KERN_INFO "Process Scheduler module is being loaded.\n");
 	
 	/**
@@ -203,3 +200,6 @@ static void __exit process_scheduler_module_cleanup(void)
 module_init(process_scheduler_module_init);
 /** Initializing the kernel module exit with custom cleanup method */
 module_exit(process_scheduler_module_cleanup);
+
+/**Initializing the time_quantum*/
+module_param(time_quantum, int, 0);

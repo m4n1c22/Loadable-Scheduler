@@ -1,6 +1,6 @@
 ##Test Scheduler
 
-Testing an LKM support based Scheduler. 
+Testing an LKM[1] support based Scheduler. 
 The LKM Scheduler primarily works on the principle of load and go.
 The scheduler is initiated by compiling the source code associated with the LKM and loading the kernel modules using the scripts.
 Once the compiling and loading is complete, the user processes are handed out an option to use the existing OS scheduler or
@@ -37,3 +37,7 @@ to use the LKM based scheduler.
 - After successful compilation, open two new terminals in the same location and run the test_pr.out in those terminals with the command `./test_pr.out` or `make test`. Note: the test_pr.out will execute infinitely, therefore you will need to terminate it manually.
 - Now you can witness the effect of the scheduler within seconds. Currently the scheme used is static round robin scheme with time quantum of 3 secs(default value). You can modify the time quantum through the option `time_quantum` and then the value(in secs). For example, to load tq value we provide the value as: `insmod process_scheduler.ko time_quantum=4` say 4 is the new time quantum.
 - Finally if you are done using the LKM and you need to remove it run the command `make unload` which would unload the kernel modules and clean them or run the script `make rmmod` which would only remove the kernel module but not clean them.
+
+
+###Links
+[1] https://en.wikipedia.org/wiki/Loadable_kernel_module

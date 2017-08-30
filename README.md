@@ -39,5 +39,5 @@ to use the LKM based scheduler.
 - Finally if you are done using the LKM and you need to remove it run the command `make unload` which would unload the kernel modules and clean them or run the script `make rmmod` which would only remove the kernel module but not clean them.
 
 
-###Links
+### Links
 [1] https://en.wikipedia.org/wiki/Loadable_kernel_module

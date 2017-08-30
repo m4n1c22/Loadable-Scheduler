@@ -1,4 +1,4 @@
-##Test Scheduler
+## Test Scheduler
 
 Testing an LKM[1] support based Scheduler. 
 The LKM Scheduler primarily works on the principle of load and go.
@@ -6,19 +6,19 @@ The scheduler is initiated by compiling the source code associated with the LKM 
 Once the compiling and loading is complete, the user processes are handed out an option to use the existing OS scheduler or
 to use the LKM based scheduler.
 
-###Design of LKM Based Scheduler
+### Design of LKM Based Scheduler
 - The user processes initially writes its process id to the file `/proc/process_sched_add` which corresponds to the kernel module `process_set`. This procedure completes the registration of a process to the LKM Scheduler.
 - The LKM based scheduler is executed internally via the kernel module `process_scheduler`. The module executes a work queue construct for every time quanta.
 - The `process_set` and `process_scheduler` modules are coupled through the kernel module `process_queue`. The `process_queue` module handles the internal details of all the processes associated with the LKM Scheduler. It stores the process info as simple link list nodes. 
 - Various interfaces are defined within the `process_queue` to perform add, remove, get_first, print operations on the queue. The scheduler performs an add and remove based on the context switch operation being triggered for every time quanta.
 - On every time quanta, the scheduler pushes the currently executing PID to the `process_queue` via `add_to_process` interface. And change its execution from Running to wait via `task` based interfaces. Once the currently executing process is added successfully into the queue, the process in the front of the queue is selected. The selected process state is changed to running and also removed from the queue.
 
-###Requirements
+### Requirements
 - Linux OS with kernel version 3.1x with LKM support enabled.
 - `make`
 - `gcc` 
 
-###Files included:
+### Files included:
 
 - process_set.c - source code for setting a process to the custom scheduler.
 - process_scheduler.c - source code for the custom scheduler
@@ -28,7 +28,7 @@ to use the LKM based scheduler.
 - insmod_scr.sh - LKM insertion script.
 - rmmod_scr.sh - LKM removal script.
 
-###Executing the Scheduler
+### Executing the Scheduler
 - Open a terminal and go to the location where the git cloning was performed.
 - Compile the LKM by running the Makefile. Run `make` to compile the source code related to LKM. If needed a clean build, run `make cleanall` before default `make`.
 - After successful compilation of Makefile, you would witness .ko files in the folder. These files are kernel object files for LKM related aspects.

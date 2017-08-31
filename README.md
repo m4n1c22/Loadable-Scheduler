@@ -1,6 +1,6 @@
 ## Test Scheduler
 
-Testing an LKM[1] support based Scheduler. 
+Testing an LKM(Loadable Kernel Module)[1] support based Scheduler. 
 The LKM Scheduler primarily works on the principle of load and go.
 The scheduler is initiated by compiling the source code associated with the LKM and loading the kernel modules using the scripts.
 Once the compiling and loading is complete, the user processes are handed out an option to use the existing OS scheduler or

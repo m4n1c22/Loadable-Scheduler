@@ -1,35 +1,43 @@
-#MACROS
-obj-m += process_queue.o
-obj-m += process_scheduler.o
-obj-m += process_set.o
-PWD := $(shell pwd)
-KVER := $(shell uname -r)
-#Target option for Compiling all the tasks
-default:
-	make -C /lib/modules/$(KVER)/build SUBDIRS=$(PWD) modules
-#Target option for inserting the generated kernel module into kernel.
-insmod:
-	sh insmod_scr.sh
-#Target option for removing the generated kernel module from kernel.
-rmmod:
-	sh rmmod_scr.sh
+TEST_PROC_SRC := Process_Test/test_pr.c
+TEST_PROC_EXE := Process_Test/test_pr.out
+
+TEST_PTHREAD_SRC := Pthread_Test/test_pthread.c
+TEST_PTHREAD_EXE := Pthread_Test/test_pthread.out
+
+PTHREAD_LIB := -lpthread
+
 #Target option for compiling and loading kernel module.
-load: default insmod
+load: 
+	cd scheduler && make load
 #Target option for unloading and cleaning the generated kernel modules.
-unload: rmmod clean_modules
+unload: 
+	cd scheduler && make unload
 
 #Target option for compiling the test_process program.
-comp_test:
-	gcc test_pr.c -o test_pr.out
+comp_pr_test:
+	gcc $(TEST_PROC_SRC) -o $(TEST_PROC_EXE)
 #Target option for running the test_process program.
-test: comp_test 
-	./test_pr.out
+pr_test: comp_pr_test 
+	./$(TEST_PROC_EXE)
+
+
+#Target option for compiling the test_pthread program.
+comp_pthread_test:
+	gcc $(TEST_PTHREAD_SRC) -o $(TEST_PTHREAD_EXE) $(PTHREAD_LIB)
+#Target option for running the test_pthread program.
+pthread_test: comp_pthread_test 
+	./$(TEST_PTHREAD_EXE)
+
+
 
 #Target option for cleaning the generated kernel modules.
 clean_modules:
-	make -C /lib/modules/$(KVER)/build SUBDIRS=$(PWD) clean
+	cd scheduler && make clean
 #Target option for cleaning the test_process program.
-clean_test:
-	rm -f ./test_pr.out
+clean_pr_test:
+	rm -f $(TEST_PROC_EXE)
+#Target option for cleaning the test_process program.
+clean_pthread_test:
+	rm -f $(TEST_PTHREAD_EXE)
 #Target option for cleaning the test_process program and the generated kernel modules
-cleanall: clean_test clean_modules
+cleanall: clean_pr_test clean_pthread_test clean_modules

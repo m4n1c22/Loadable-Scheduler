@@ -1,4 +1,4 @@
-## Test Scheduler
+## Loadable Scheduler
 
 Testing an LKM(Loadable Kernel Module)[1] support based Scheduler. 
 The LKM Scheduler primarily works on the principle of load and go.

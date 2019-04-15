@@ -43,7 +43,7 @@ extern int get_first_process_in_queue(void);
 extern int remove_terminated_processes_from_queue(void);
 
 /**Function Prototype for Scheduler*/
-static void context_switch(void);
+static void context_switch(struct work_struct *w);
 int static_round_robin_scheduling(void);
 
 /**Flags*/
@@ -68,7 +68,7 @@ static DECLARE_DELAYED_WORK(scheduler_hdlr, context_switch);
 					process with another process. The method internally calls
 					the provided scheduling policy.
 */
-static void context_switch(void){
+static void context_switch(struct work_struct *w){
 	
 	/** Boolean status of the queue.*/
 	bool q_status=false;
@@ -166,7 +166,7 @@ static int __init process_scheduler_module_init(void)
 	}
 	else {
 		/** Performing an internal call for context_switch */
-		context_switch();
+		//context_switch();
 		/** Setting the delayed work execution for the provided rate */
 		q_status = queue_delayed_work(scheduler_wq, &scheduler_hdlr, time_quantum*HZ);
 	}

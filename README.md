@@ -14,7 +14,7 @@ to use the LKM based scheduler.
 - On every time quanta, the scheduler pushes the currently executing PID to the `process_queue` via `add_to_process` interface. And change its execution from Running to wait via `task` based interfaces. Once the currently executing process is added successfully into the queue, the process in the front of the queue is selected. The selected process state is changed to running and also removed from the queue.
 
 ### Requirements
-- Linux OS with kernel version 3.1x with LKM support enabled.
+- Linux OS with kernel version > 4.0 with LKM support enabled.
 - `make`
 - `gcc` 
 
